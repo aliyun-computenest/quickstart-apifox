@@ -524,7 +524,6 @@ map_hash_bucket_size 26214;
 
 1. 通过 https://cdn.apifox.cn/app/static/openapi-generator-cli.jar 手动下载生成代码插件；
 2. 将插件手动放到 Apifox 安装目录中即可；
-   ![image.png](https://api.apifox.cn/api/v1/projects/2622214/resources/402357/image-preview)
 
 
 如有更多问题请查看文档 https://apifox-ee-setup.apifox.cn/?pwd=FhUcxj0y
@@ -537,4 +536,4 @@ map_hash_bucket_size 26214;
 
 联系电话：[400-0518-030](400-0518-030)
 
-`(添加二维码图片)`
+![Apifox 客户经理](./202312051047964.png)
