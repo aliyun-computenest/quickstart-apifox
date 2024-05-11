@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>Apifox 服务实例部署文档 - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#apifox">Apifox 服务实例部署文档</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">部署架构</a></li>
+                  
+                      <li class="li-h3"><a href="#1">1. 硬件</a></li>
+                  
+                      <li class="li-h3"><a href="#2">2. 系统</a></li>
+                  
+                      <li class="li-h3"><a href="#3-qa">3. 服务器资源相关Q&amp;A</a></li>
+                  
+              
+                  <li><a href="#_3">二、获取安装文件</a></li>
+                  
+              
+                  <li><a href="#_4">部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_5">部署步骤</a></li>
+                  
+                      <li class="li-h3"><a href="#_18">验证结果</a></li>
+                  
+                      <li class="li-h3"><a href="#demo">使用Demo</a></li>
+                  
+              
+                  <li><a href="#_20">问题排查</a></li>
+                  
+                      <li class="li-h3"><a href="#_21">容器服务启动异常</a></li>
+                  
+                      <li class="li-h3"><a href="#mysql-redis">容器 MYSQL 或 REDIS 连不通</a></li>
+                  
+                      <li class="li-h3"><a href="#_22">接口错误定位</a></li>
+                  
+                      <li class="li-h3"><a href="#apiv1configsclient-err_connection_time_out">浏览器访问 /api/v1/configs/client 发生错误 ERR_CONNECTION_TIME_OUT</a></li>
+                  
+                      <li class="li-h3"><a href="#_23">配置了云存储，图片上传失败</a></li>
+                  
+                      <li class="li-h3"><a href="#license">关于客户端替换 license</a></li>
+                  
+                      <li class="li-h3"><a href="#apifox-80">如果 Apifox 启动后 80 端口不行</a></li>
+                  
+                      <li class="li-h3"><a href="#_24">服务端报错</a></li>
+                  
+                      <li class="li-h3"><a href="#_25">生成业务代码下载安装生成插件提示错误</a></li>
+                  
+              
+                  <li><a href="#_26">联系我们</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="apifox">Apifox 服务实例部署文档</h1>
+<h2 id="_1">概述</h2>
+<p><code>Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念，从 API 的全生命周期、全角色工具切入，通过一体化的协作平台实现研发团队各角色的全面协同，为开发者和私有化部署的客户提升软件开发的整体效率。Apifox 功能直击开发工程师的痛点，产品体验简单易用，大幅提升了开发团队的工作效率，迅速赢得了一大批忠实的用户。
+本文向您介绍如何在线下服务器部署私有化版 Apifox。</code></p>
+<h2 id="_2">部署架构</h2>
+<p>环境资源准备</p>
+<h3 id="1">1. 硬件</h3>
+<table>
+<thead>
+<tr>
+<th>设备推荐配置</th>
+<th>设备数量</th>
+<th>部署对象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4核8G，100G磁盘空间</td>
+<td>1</td>
+<td>Apifox 服务端</td>
+</tr>
+<tr>
+<td>4核8G，100G磁盘空间</td>
+<td>1</td>
+<td>Mysql 数据库（版本 8 以上）、Redis 数据库（版本 6 以上）</td>
+</tr>
+</tbody>
+</table>
+<p>设备为推荐配置，根据具体的使用人数，不超过 300 人也可以选用单个服务器进行部署，<strong>单机器部署推荐使用 docker-compose 方式部署</strong> 。</p>
+<h3 id="2">2. 系统</h3>
+<p>推荐使用 Linux，发行版不限制，只要能安装 docker 即可。</p>
+<ul>
+<li>Docker Engine 版本：可以通过命令 <code>docker --version</code> 查看版本号，推荐使用 2022 年的 <a href="https://docs.docker.com/engine/release-notes/#201013">20.10.13</a> 的版本，最低须使用 2020 年的 <a href="https://docs.docker.com/engine/release-notes/#20100">20.10.0</a> 的版本</li>
+<li>【可选】Docker Compose 版本：可以通过命令 <code>docker compose --version</code> 查看版本号，推荐使用 <code>2.3.3</code>，最低须使用 <code>&gt;= 2.x</code> 的版本</li>
+</ul>
+<h3 id="3-qa">3. 服务器资源相关Q&amp;A</h3>
+<p>1.Apifox 支持非 K8s 的集群部署吗？ 
+支持的，将镜像导入到这个集群内的镜像源里，参考 docker run 去编写或界面化配置启动即可</p>
+<p>2.访问 Redis 支持集群访问吗？
+有相关需求去适配支持，如果是主从类型的话，指定主节点即可，要可写，如果是哨兵则暂时不支持</p>
+<p>3.是否支持其他的数据库
+如果是与 Mysql8 同语法的数据库或分支数据库可以支持</p>
+<h2 id="_3">二、获取安装文件</h2>
+<p>请联系 Apifox 工作人员获取<code>安装文件下载地址</code> 和 <code>授权 License 序列号</code>
+解压后的安装文件包含如下：</p>
+<p><strong>1. 以下文件为必须下载：</strong>
+<code>apifox-ee-xxx.docker.zip</code>：apifox 服务端 docker 镜像压缩包，需 zip 解压（文件名中的 xxx 表示版本号）</p>
+<p><strong>2. 以下为公开的 docker 镜像，仅服务器无法直连外网时，才需要下载：</strong></p>
+<p>链接: <a href="https://pan.baidu.com/s/1MjXi1Ekzd_9TRONv_j9uuA">https://pan.baidu.com/s/1MjXi1Ekzd_9TRONv_j9uuA</a> 提取码: f5t6 </p>
+<p><code>mysql-8.0.docker.zip</code>：mysql 官方镜像（mysql:8.0）压缩包，需 zip 解压
+<code>redis-6.0.5-alpine.docker.zip</code>：redis 官方镜像（redis:6.0.5-alpine）压缩包，需 zip 解压</p>
+<h2 id="_4">部署流程</h2>
+<h3 id="_5">部署步骤</h3>
+<h4 id="_6">一、获取安装文件</h4>
+<p>请联系 Apifox 工作人员获取<code>安装文件下载地址</code> 和 <code>授权 License 序列号</code>
+解压后的安装文件包含如下：</p>
+<p><strong>1. 以下文件为必须下载：</strong>
+<code>apifox-ee-xxx.docker.zip</code>：apifox 服务端 docker 镜像压缩包，需 zip 解压（文件名中的 xxx 表示版本号）</p>
+<p><strong>2. 以下为公开的 docker 镜像，仅服务器无法直连外网时，才需要下载：</strong></p>
+<p>链接: <a href="https://pan.baidu.com/s/1MjXi1Ekzd_9TRONv_j9uuA">https://pan.baidu.com/s/1MjXi1Ekzd_9TRONv_j9uuA</a> 提取码: f5t6 </p>
+<p><code>mysql-8.0.docker.zip</code>：mysql 官方镜像（mysql:8.0）压缩包，需 zip 解压
+<code>redis-6.0.5-alpine.docker.zip</code>：redis 官方镜像（redis:6.0.5-alpine）压缩包，需 zip 解压</p>
+<h4 id="_7">二、安装</h4>
+<h5 id="1-mysql">1. 安装 mysql</h5>
+<h6 id="11-mysql">1.1 运行 mysql 容器</h6>
+<p>如果已有 mysql 数据库，可直接跳过这一步。</p>
+<p><strong>1.1.1 加载 mysql 离线镜像</strong>
+提示：如服务器可以直连外网，可跳过本步骤。</p>
+<p>将<code>mysql-8.0.docker.zip</code>解压（解压命令：<code>unzip mysql-8.0.docker.zip</code>）后得到文件<code>mysql-8.0.docker</code>，然后运行以下命令。</p>
+<pre><code class="language-shell">docker load -i mysql-8.0.docker
+</code></pre>
+<p>如得到的是<code>mysql-8.0.tar</code>，则运行以下命令</p>
+<pre><code class="language-shell">docker load -i mysql-8.0.tar
+</code></pre>
+<p><strong>1.1.2 启动 mysql 容器</strong></p>
+<p>启动容器前需要先确保<strong>挂载目录</strong>存在且有写入权限，可以执行 <code>mkdir -p ~/data/var/data/mysql8/db</code></p>
+<pre><code class="language-shell">docker run \
+    --restart always \
+    --name=mysql8 \
+    -e MYSQL_ROOT_PASSWORD=这里改成root账号的密码 \
+    -v ~/data/var/data/mysql8/db:/var/lib/mysql \
+    -p 3306:3306 \
+    -d mysql:8.0 --default-authentication-plugin=mysql_native_password --character-set-server=UTF8MB4
+</code></pre>
+<h5 id="2-redis">2. 安装 redis</h5>
+<p>如果已有 redis，则可以直接跳过这一步</p>
+<h6 id="21-redis">2.1 加载 redis 离线镜像</h6>
+<p>提示：如服务器可以直连外网，可跳过本步骤。</p>
+<p>将<code>redis-6.0.5-alpine.docker.zip</code>解压（解压命令：<code>unzip redis-6.0.5-alpine.docker.zip</code>）后得到文件<code>redis-6.0.5-alpine.docker</code>，然后运行以下命令。</p>
+<pre><code class="language-shell">docker load -i redis-6.0.5-alpine.docker
+</code></pre>
+<p>如得到的是<code>redis-6.0.5-alpine.tar</code>，则运行以下命令</p>
+<pre><code class="language-shell">docker load -i redis-6.0.5-alpine.tar
+</code></pre>
+<h6 id="22-redis">2.2 启动 redis 容器</h6>
+<pre><code class="language-shell">docker run \
+    --restart always \
+    --name=redis6 \
+    -p 6379:6379 \
+    -d redis:6.0.5-alpine
+</code></pre>
+<h5 id="3-apifox">3. 初始化 apifox 数据库</h5>
+<h6 id="31-mysql">3.1. 进入 mysql 容器</h6>
+<pre><code>docker exec -it mysql8 /bin/sh
+</code></pre>
+<h6 id="32">3.2. 进入容器后，连接数据库并按提示输入密码</h6>
+<pre><code>mysql -uroot -p
+</code></pre>
+<h6 id="33">3.3. 执行创建数据库命令</h6>
+<p>MySQL 里创建数据库**</p>
+<pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS apifox DEFAULT CHARACTER SET utf8mb4 DEFAULT COLLATE utf8mb4_general_ci;
+</code></pre>
+<h5 id="4-apifox">4. 安装 Apifox 服务端</h5>
+<h6 id="41-apifox">4.1 运行 Apifox 容器</h6>
+<h6 id="apifox_1">加载 Apifox 离线镜像</h6>
+<p>将<code>apifox-ee-xxx.docker.zip</code>解压（解压命令：<code>unzip apifox-ee-xxx.docker.zip</code>)后得到文件<code>apifox-ee.docker.docker</code>，然后运行以下命令。</p>
+<pre><code class="language-shell">docker load -i apifox-ee.docker
+</code></pre>
+<h6 id="apifox_2">运行 Apifox 容器</h6>
+<p>以下示例使用原生 Docker 方式安装，也 k8s 或 Docker Compose 方式安装</p>
+<ul>
+<li><a href="doc-2355687">k8s 方式安装指南</a></li>
+<li><a href="doc-2355110">Docker Compose 方式安装</a></li>
+</ul>
+<pre><code class="language-shell">docker run \
+    --restart always \
+    --name=apifox \
+    -e MYSQL_HOST=这里改成mysql的ip地址（注意：如果mysql和也安装在本机，不能使用 127.0.0.1，要使用本机内网IP） \
+    -e MYSQL_PORT=3306 \
+    -e MYSQL_DATABASE=apifox \
+    -e MYSQL_USER_NAME=这里改成有apifox库的建表权限的mysql账号名 \
+    -e MYSQL_PASSWORD=这里改成mysql账号的密码 \
+    -e REDIS_HOST=这里改成redis的ip地址（注意：如果redis和也安装在本机，不能使用 127.0.0.1，要使用本机内网IP） \
+    -e REDIS_PORT=6379 \
+    -e REDIS_PASSWORD=redis的密码，可为空 \
+    -e REDIS_DB=0 \
+    -e JWT_SECRET='这里改成20~50位随机字符（登录态等 token 加密秘钥），请务必妥善记录并保管好该值，后续更新升级的时候会用到' \
+    -e MAILER_HOST=smtp.exmail.qq.com \
+    -e MAILER_PORT=465 \
+    -e MAILER_SECURE=true \
+    -e MAILER_USER=系统邮件发件邮箱地址 \
+    -e MAILER_PASSWORD=系统邮件发件邮箱密码 \
+    -e LICENSE='这里改成服务端授权License' \
+    -e ADMIN_USERNAME=这里改成管理后台的账号\
+    -e ADMIN_PASSWORD=这里改成管理后台的密码\
+    -v ~/data/docker/apifox-api/appdata/logs:/usr/src/app/logs \
+    -v ~/data/docker/apifox-api/appdata/static-upload:/usr/src/app/app/public/static-upload \
+    -e BASE_URL='license文件中的IP地址或域名地址（如：http://192.168.2.28 ），用于头像、重置密码的服务端地址' \
+    -p 80:80 \
+    -d apifox-ee
+</code></pre>
+<h6 id="42">4.2 挂载目录说明</h6>
+<blockquote>
+<p>集群环境部署推荐使用云存储不建议使用挂载存储的方式，常见的云存储方案都支持的：阿里云OSS、腾讯云COS、七牛云、AWS S3 都支持，参考下面的环境变量配置即可</p>
+</blockquote>
+<ul>
+<li>static_upload 目录，用于存储用户上传的头像、自动化测试的团队报告和文档内上传的图片等（<strong>云存储方案</strong>不需要配置）</li>
+<li>logs 目录，用于存储服务器运行产生的访问日志、错误日志等，主要用于系统接口无法访问时辅助排查（可选）</li>
+</ul>
+<h6 id="43">4.3 环境变量说明</h6>
+<h6 id="_8">基础配置</h6>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BASE_URL</td>
+<td>服务端访问地址（如：http://192.168.2.28 ），用于头像、重置密码的服务端地址。</td>
+<td></td>
+</tr>
+<tr>
+<td>SERVER_BASE_PATH</td>
+<td>服务端基础路径（如：/apifox），v2.1.24 开始支持，需要 LICENSE 授权，请在申请 LICENSE 时将该路径一并提供给 apifox 工作人员</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_HOST</td>
+<td>MySQL 服务器地址</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_PORT</td>
+<td>MySQL 服务器端口</td>
+<td>3306</td>
+</tr>
+<tr>
+<td>MYSQL_DATABASE</td>
+<td>数据库名</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_USER_NAME</td>
+<td>MySQL 用户名</td>
+<td></td>
+</tr>
+<tr>
+<td>MYSQL_PASSWORD</td>
+<td>MySQL 用户密码</td>
+<td></td>
+</tr>
+<tr>
+<td>REDIS_HOST</td>
+<td>Redis 服务器地址</td>
+<td></td>
+</tr>
+<tr>
+<td>REDIS_PORT</td>
+<td>Redis 服务器端口</td>
+<td>6379</td>
+</tr>
+<tr>
+<td>REDIS_PASSWORD</td>
+<td>Redis 密码，可为空</td>
+<td></td>
+</tr>
+<tr>
+<td>REDIS_DB</td>
+<td>Redis DB，一般填 0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>JWT_SECRET</td>
+<td>登录态等 token 加密秘钥，10~50位随机字符，建议修改</td>
+<td></td>
+</tr>
+<tr>
+<td>LICENSE</td>
+<td>服务器端授权 License，联系 Apifox 工作人员获取</td>
+<td></td>
+</tr>
+<tr>
+<td>ADMIN_USERNAME</td>
+<td>后台管理系统的管理员账号</td>
+<td></td>
+</tr>
+<tr>
+<td>ADMIN_PASSWORD</td>
+<td>后台管理系统的管理员密码</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h6 id="_9">系统邮件配置（非必须）</h6>
+<p>系统邮件，用在“找回密码”时发送重置密码邮件</p>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MAILER_HOST</td>
+<td>smtp 服务器地址</td>
+<td></td>
+</tr>
+<tr>
+<td>MAILER_PORT</td>
+<td>smtp 端口</td>
+<td></td>
+</tr>
+<tr>
+<td>MAILER_SECURE</td>
+<td>是否使用 SSL，可选值：true、false</td>
+<td></td>
+</tr>
+<tr>
+<td>MAILER_USER</td>
+<td>发件人邮箱地址</td>
+<td></td>
+</tr>
+<tr>
+<td>MAILER_PASSWORD</td>
+<td>发件人邮箱密码</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h6 id="_10">功能配置（非必须）</h6>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ENABLE_WEB</td>
+<td>是否启用 WEB 版，填 true 启用，空字符串或不设置为关闭，并且需要授权 License 支持才会生效</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NOT_FOUND_PAGE_URL</td>
+<td>设置后端服务的 404 的跳转地址，需使用相对路径，以 / 开头</td>
+<td>/help/index.html</td>
+<td>选填</td>
+</tr>
+</tbody>
+</table>
+<h6 id="_11">实时协同配置（非必须）</h6>
+<p>:::tip
+Apifox 私有化版本需<code>&gt;= 2.5.1</code>才能使用实时协同功能
+:::</p>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RTM_QUEUE_ENABLE</td>
+<td>是否开启实时协同</td>
+<td>false</td>
+<td>开启实时同步时必填</td>
+</tr>
+<tr>
+<td>RTS_ENABLE</td>
+<td>是否开启实时协同</td>
+<td>false</td>
+<td>开启实时同步时必填</td>
+</tr>
+<tr>
+<td>RTM_REDIS_HOST</td>
+<td>实时协同 Redis 服务器地址</td>
+<td></td>
+<td>开启实时同步时必填</td>
+</tr>
+<tr>
+<td>RTM_REDIS_PORT</td>
+<td>实时协同 Redis 服务器端口</td>
+<td></td>
+<td>开启实时同步时必填</td>
+</tr>
+<tr>
+<td>RTM_REDIS_PASSWORD</td>
+<td>实时协同 Redis 密码，无密码可为空</td>
+<td></td>
+<td>开启实时同步时必填</td>
+</tr>
+<tr>
+<td>RTM_REDIS_DB</td>
+<td>实时协同 Redis DB</td>
+<td></td>
+<td>开启实时同步时必填</td>
+</tr>
+</tbody>
+</table>
+<h5 id="_12">静态资源（图片等）存储配置（非必须）</h5>
+<p>非必须，配置将静态资源的存储方式，默认以本地文件方式存储。</p>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STORAGE_DRIVER</td>
+<td>文件存储选项，默认为 file, 即本地文件存储。可选云存储: oss = 阿里云OSS, cos = 腾讯云COS, s3 = AWS S3, qiniu = 七牛云</td>
+<td>file</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>默认使用本地文件存储，如需使用其他云存储，请参考以下方式设置：</p>
+<ul>
+<li><a href="doc-2355040">AWS S3 接入 (也支持私有 S3 协议)</a></li>
+<li><a href="doc-2355042">阿里云 OSS 接入</a></li>
+</ul>
+<h5 id="https">HTTPS 支持配置（非必须）</h5>
+<p>如需要让客户端以 https 方式访问 Apifox 服务器，则可增加如下配置。</p>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SERVER_SSL_CERTIFICATE_FILE</td>
+<td>https 证书文件的容器内路径（挂载证书文件的的方式配置 http，需要挂载证书文件到容器内）</td>
+<td></td>
+<td>选填</td>
+</tr>
+<tr>
+<td>SERVER_SSL_CERTIFICATE_KEY_FILE</td>
+<td>https 证书密钥文件的容器内路径（挂载证书文件的的方式配置 https）</td>
+<td></td>
+<td>选填</td>
+</tr>
+<tr>
+<td>SERVER_SSL_CERTIFICATE</td>
+<td>https 证书内容（不挂载的方式配置 https）</td>
+<td></td>
+<td>选填</td>
+</tr>
+<tr>
+<td>SERVER_SSL_CERTIFICATE_KEY</td>
+<td>https 证书密钥内容（不挂载的方式配置 https）</td>
+<td></td>
+<td>选填</td>
+</tr>
+</tbody>
+</table>
+<h5 id="_13">安全性配置（非必须）</h5>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DISABLE_REGISTER</td>
+<td>是否禁止注册功能</td>
+<td></td>
+<td>可选填：true、false，填 true 表示禁止，不设置表示允许注册；开启禁止注册功能后，只允许手动在后台管理添加账号（SSO 登录也会被禁止创建新账号）</td>
+</tr>
+<tr>
+<td>PASSWORD_ERROR_RATE_LIMIT_DURATION</td>
+<td>登录错误次数限制【时间间隔】，单位秒</td>
+<td>1800</td>
+<td></td>
+</tr>
+<tr>
+<td>PASSWORD_ERROR_RATE_LIMIT_MAX</td>
+<td>【时间间隔】内允许最多错误次数</td>
+<td>15</td>
+<td>0 表示不限制次数。</td>
+</tr>
+<tr>
+<td>PASSWORD_TRANSFER_EXTRA_ENCRYPTION</td>
+<td>是否开启密码传输加密</td>
+<td></td>
+<td>选填，填 true 表示启用</td>
+</tr>
+<tr>
+<td>SECRET_KEY_FOR_COMMON_CASE</td>
+<td>rsa 加密键值对</td>
+<td></td>
+<td>例如：'[{"public":"base64编码后的公钥","private":"base64 编码后的私钥"}]'</td>
+</tr>
+<tr>
+<td>APP_DOMAIN_WHITE_LIST</td>
+<td>CORS 同源策略相关，设置允许访问跨域访问后端服务的域名</td>
+<td></td>
+<td>从 2.3.12 开始的服务端版本才支持。示例值：http://apifox.com,https://apifox.com,http://app.apifox.com</td>
+</tr>
+</tbody>
+</table>
+<h5 id="_14">静态文件资源存储（非必须）</h5>
+<p>主要用来存放客户端安装包和升级包。
+:::caution
+该功能还在开发中，Coming soon
+:::</p>
+<table>
+<thead>
+<tr>
+<th>环境变量名</th>
+<th>含义</th>
+<th>默认值</th>
+<th>其他</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ASSETS_BASE_URL</td>
+<td>静态大文件（客户端升级包、视频教程等）存储路径前缀</td>
+<td>{BASE_URL}/assets/</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>:::tip
+请将存放在如下位置</p>
+<ol>
+<li>客户端安装包/升级包存放位置：{ASSETS_BASE_URL}/clients/</li>
+<li>教程视频文件存放位置：{ASSETS_BASE_URL}/videos/
+   :::</li>
+</ol>
+<h4 id="44">4.4 【可选】通过挂载配置文件的方式设置容器内需要的变量</h4>
+<blockquote>
+<p>此项是可选配置，多数情况推荐用变量配置，如果环境有限制变量值长度才建议启用配置文件方式</p>
+</blockquote>
+<p>自定义配置文件。如下示例，可使用「覆盖模式」，也可使用「补充模式」。</p>
+<pre><code class="language-shell"># 覆盖模式（覆盖启动命令中的 env 配置）
+export SERVER_BASE_PATH=&quot;/456&quot;
+
+# 补充模式（不覆盖启动命令中的 env 配置）
+if [ &quot;$BASE_URL&quot; == &quot;&quot; ]; then
+  export BASE_URL=&quot;/abc&quot;
+fi
+</code></pre>
+<p>在容器的启动参数中配置，将自定义的配置文件，挂载到容器内。
+ 容器内路径，须指定为 <strong>/usr/src/app/startup.conf</strong></p>
+<pre><code class="language-shell">......
+    -v ~/data/docker/apifox-api/startup.conf:/usr/src/app/startup.conf \
+......
+</code></pre>
+<h4 id="_15">三、系统管理后台</h4>
+<p>开启系统管理后台，需要启动服务端容器时配置相关的环境变量，如下：</p>
+<ul>
+<li>系统管理后台账号的环境变量名为：ADMIN_USERNAME</li>
+<li>系统管理后台密码的环境变量名为：ADMIN_PASSWORD</li>
+</ul>
+<p>使用浏览器访问，访问地址为为 <code>http://服务端访问地址 + /admin</code>（如：http://192.168.2.28/admin ）</p>
+<blockquote>
+<p>其中 http://xxx 为 BASE_URL 变量配置的地址，服务端容器镜像的启动变量里还需要增加设置管理后台的账号和密码环境变量才能登录使用。</p>
+</blockquote>
+<h4 id="_16">四、数据备份</h4>
+<p>为了保障数据安全，请务必设置每日定时备份数据库，只要备份 mysql 数据库即可。</p>
+<h4 id="_17">五、客户端自动更新</h4>
+<ol>
+<li>自 2.5.1 版本后支持检测更新功能，需要运维部署人员在 docker 镜像启动时新增一个挂载目录，挂载到容器 /usr/src/app/app/public/client-packages 目录内，例如 ：</li>
+</ol>
+<pre><code class="language-shell">-v /data/xxx:/usr/src/app/app/public/client-packages \
+</code></pre>
+<ol>
+<li>运维人员将所有客户端产物（包括yml文件）存放至服务器该目录即可，比如上面的 /data/xxx 下</li>
+</ol>
+<h3 id="_18">验证结果</h3>
+<h4 id="_19">检查是否运行成功</h4>
+<pre><code class="language-shell">docker logs apifox -f
+</code></pre>
+<p>提示：Ctrl + C 可以退出查看界面</p>
+<p>如果显示如下信息，表示运行成功，否则表示没有启动成功。</p>
+<pre><code class="language-shell">...
+...
+[master] egg started on http://127.0.0.1:xxxx
+</code></pre>
+<p>到此，安装已完成。</p>
+<p>如果遇到问题，可以参考 <a href="#user-content-%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%BC%82%E5%B8%B8">常见问题</a></p>
+<h3 id="demo">使用Demo</h3>
+<p><code>(服务使用说明内容)</code></p>
+<pre><code>eg:
+
+请访问Demo官网了解如何使用：[使用文档](https://www.aliyun.com)
+</code></pre>
+<h2 id="_20">问题排查</h2>
+<h3 id="_21">容器服务启动异常</h3>
+<p>使用命令<code>docker exec -it apifox sh</code> 进入容器后执行：</p>
+<pre><code>nc -vz $MYSQL_HOST $MYSQL_PORT
+nc -vz $REDIS_HOST $REDIS_PORT
+node env-test.js 
+</code></pre>
+<p>通过 docker logs -f apifox 查看容器日志截图或拍照，然后将启动命令（注意模糊部分隐私密钥信息）也截图一下，一起提供到相应微信群咨询即可</p>
+<p>一般常见的问题有：</p>
+<ul>
+<li>MYSQL 版本没有跟文档一致，需要 8.0 以上</li>
+<li>Redis 版本没有跟文档一致，需要 6 以上</li>
+<li>MYSQL 账号权限问题，无法创建表等</li>
+<li>Redis 权限问题，连接的为从节点且从节点没有配置允许写，没有写入权限</li>
+<li>MYSQL_HOST 或 REDIS_HOST 配置不正确，改为相应 IP 或 <code>docker inspect apifox | grep 172</code> 改为 Gateway IP 即可</li>
+<li>Docker 版本较旧，最低须使用 <code>&gt;=20.10.0</code> 以上</li>
+</ul>
+<h3 id="mysql-redis">容器 MYSQL 或 REDIS 连不通</h3>
+<p>这种情况常见表现是启动出现卡在 <code>npx sequelize db:migrate</code> 然后就出现 <code>existed Node.js</code> 或 redis 相关关键字。</p>
+<ul>
+<li>如果不是在同一台机器上的数据库，则需要定位一下是否在不同网段连通不了，或有防火墙、安全组限制引起的。</li>
+<li>如果是在同一台机器的话，可以检查一下防火墙配置</li>
+</ul>
+<p>以下是 CentOS firewall 防火墙的示例：</p>
+<pre><code class="language-bash"># 查看防火墙状态，如果是 running 才需要执行下面的命令
+firewall-cmd --state
+# 查看现有的规则，看看 MYSQL、REDIS 有没有开放相关的 MYSQL、REDIS 端口允许 docker 访问
+iptables -nL
+firewall-cmd --zone=public --list-ports
+# 针对 docker 网段开放
+firewall-cmd --permanent --add-rich-rule=&quot;rule family=&quot;ipv4&quot; source address=&quot;172.17.0.0/24&quot; accept&quot;
+</code></pre>
+<p>更多防火墙相关命令：<a href="http://www.dowhere.com/2021/06/07/centos7%E7%9A%84firewall-cmd%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">firewalld</a>、<a href="https://luciaca.cn/posts/ufw-common-commands/">ufw</a></p>
+<h3 id="_22">接口错误定位</h3>
+<ul>
+<li>首先确保能访问服务，通过浏览器访问一下这个接口看看 <code>/api/v1/configs/client</code> ，前面的地址是这边部署的入口，一般为服务容器启动的 BASE_URL 对象的值。 </li>
+</ul>
+<p>如果浏览器上这个接口也不能访问的话，最有可能是防火墙、云服务器的安全组、负载均衡、本地代理软件等拦截了，提供到相应微信群咨询即可。</p>
+<ul>
+<li>如果能访问，但客户端特定接口不行的话，则需要查看运行日志，在启动容器的命令里有类似这一行 <code>-v ~/data/docker/apifox-api/appdata/logs:/usr/src/app/logs \</code> 。可以通过下面的命令查看这个挂载的目录里的错误日志，查看运行日志截图或拍照，提供到相应微信群咨询即可</li>
+<li>如果能访问，返回错误码是 0 则为授权 LICENSE 已过期，1 则是授权 LICENSE 不合法</li>
+</ul>
+<pre><code>tail -1000 ~/data/docker/apifox-api/appdata/logs/apifox-api/common-error.log
+</code></pre>
+<h3 id="apiv1configsclient-err_connection_time_out">浏览器访问 <code>/api/v1/configs/client</code>  发生错误 ERR_CONNECTION_TIME_OUT</h3>
+<p>最有可能是防火墙、云服务器的安全组、负载均衡、本地代理软件等拦截，可以检查一下机器的防火墙、云服务器的安全组等配置是否有开放相关端口。</p>
+<ul>
+<li>如果还是不能访问，可以提供 <code>cat /etc/os-release</code> 和 <code>uname -a</code> 截图到相应微信群咨询即可。</li>
+</ul>
+<h3 id="_23">配置了云存储，图片上传失败</h3>
+<p>常见的云存储方案，阿里云OSS、腾讯云COS、七牛云、AWS S3 都已支持。
+不同云存储服务上传失败，可能基于多种原因，如账号权限、bucket 权限、跨区访问、网络问题等等。云存储服务的错误信息，可以在当天的服务日志中查询，并进行调试：</p>
+<pre><code>tail -1000 ~/data/docker/apifox-api/appdata/logs/apifox-api/apifox-api-web.log
+</code></pre>
+<h3 id="license">关于客户端替换 license</h3>
+<ol>
+<li>客户端版本 &gt;= 2.1.27，客户端界面已经直接支持在设置或网络请求错误的界面选择 <code>更改授权码</code> ，直接点击设置即可</li>
+<li>
+<p>客户端版本 &lt; 2.1.27，需要清理一下缓存，可以尝试删除一下缓存，重新录入 license</p>
+</li>
+<li>
+<p>windows 的话删除一下这个目录 <code>C:\Users\Administrator\AppData\Roaming\apifox-pdv</code></p>
+</li>
+<li>mac 的话删除一下这个目录 <code>~/Library/Application\ Support/apifox-pdv/</code></li>
+</ol>
+<h3 id="apifox-80">如果 Apifox 启动后 80 端口不行</h3>
+<p>通过运行下列命令
+vi /usr/local/openresty/nginx/conf/nginx.conf
+找到 client_max_body_size 这一行，前增加一个下面两行内容:</p>
+<pre><code>map_hash_max_size 26214;
+map_hash_bucket_size 26214;
+</code></pre>
+<p>重启容器 docker restart apifox</p>
+<h3 id="_24">服务端报错</h3>
+<h4 id="bind-tmpapifox-backendsock-address-in-use">bind(): /tmp/apifox-backend.sock (Address in use)</h4>
+<p>报错原因：由于服务器容器实例异常关闭导致，如服务器断电等；
+进入到容器实例中，执行一下步骤</p>
+<ol>
+<li>rm -f /tmp/apifox-backend.sock</li>
+<li>手动重启一下容器</li>
+</ol>
+<h3 id="_25">生成业务代码下载安装生成插件提示错误</h3>
+<ol>
+<li>通过 https://cdn.apifox.cn/app/static/openapi-generator-cli.jar 手动下载生成代码插件；</li>
+<li>将插件手动放到 Apifox 安装目录中即可；</li>
+</ol>
+<p>如有更多问题请查看文档 https://apifox-ee-setup.apifox.cn/?pwd=FhUcxj0y</p>
+<h2 id="_26">联系我们</h2>
+<p>欢迎访问Apifox官网（<a href="https://apifox.com">https://apifox.com/</a>）了解更多信息。</p>
+<p>联系邮箱：<a href="alextian@apifox.com">alextian@apifox.com</a></p>
+<p>联系电话：<a href="400-0518-030">400-0518-030</a></p>
+<p><img src="./202312051047964.png" alt="Apifox 客户经理" width="300" style="border: 1px solid #ccc; padding: 10px;"></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.0
+  Docs Build Date UTC : 2024-05-11 05:03:44.466832+00:00
+  -->
+</body>
+</html>
