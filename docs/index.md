@@ -536,4 +536,4 @@ map_hash_bucket_size 26214;
 
 联系电话：[400-0518-030](400-0518-030)
 
-![Apifox 客户经理](./202312051047964.png)
+<img src="./202312051047964.png" alt="Apifox 客户经理" width="300" style="border: 1px solid #ccc; padding: 10px;">
