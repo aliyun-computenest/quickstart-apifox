@@ -1,13 +1,12 @@
-# Apifox 服务实例部署文档
+# Apifox服务实例部署文档
 
 ## 概述
 
-`
-Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念，从 API 的全生命周期、全角色工具切入，通过一体化的协作平台实现研发团队各角色的全面协同，为开发者和私有化部署的客户提升软件开发的整体效率。Apifox 功能直击开发工程师的痛点，产品体验简单易用，大幅提升了开发团队的工作效率，迅速赢得了一大批忠实的用户。
-本文向您介绍如何在线下服务器部署私有化版 Apifox。
-`
+Apifox所做的API相关一体化协作流程，围绕API文档先行理念，从API的全生命周期、全角色工具切入，通过一体化的协作平台实现研发团队各角色的全面协同，为开发者和私有化部署的客户提升软件开发的整体效率。Apifox功能直击开发工程师的痛点，产品体验简单易用，大幅提升了开发团队的工作效率，迅速赢得了一大批忠实的用户。
+本文向您介绍如何在线下服务器部署私有化版Apifox
 
-## 部署架构
+
+## 部署准备
 
 环境资源准备
 
@@ -18,33 +17,21 @@ Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念
 | 4核8G，100G磁盘空间 | 1        | Apifox 服务端                                            |
 | 4核8G，100G磁盘空间 | 1        | Mysql 数据库（版本 8 以上）、Redis 数据库（版本 6 以上） |
 
-设备为推荐配置，根据具体的使用人数，不超过 300 人也可以选用单个服务器进行部署，**单机器部署推荐使用 docker-compose 方式部署** 。
+
 
 ### 2. 系统
 
 推荐使用 Linux，发行版不限制，只要能安装 docker 即可。
 
 - Docker Engine 版本：可以通过命令 `docker --version` 查看版本号，推荐使用 2022 年的 [20.10.13](https://docs.docker.com/engine/release-notes/#201013) 的版本，最低须使用 2020 年的 [20.10.0](https://docs.docker.com/engine/release-notes/#20100) 的版本
-- 【可选】Docker Compose 版本：可以通过命令 `docker compose --version` 查看版本号，推荐使用 `2.3.3`，最低须使用 `>= 2.x` 的版本
 
-### 3. 服务器资源相关Q&A
-
-1.Apifox 支持非 K8s 的集群部署吗？ 
-支持的，将镜像导入到这个集群内的镜像源里，参考 docker run 去编写或界面化配置启动即可
-
-2.访问 Redis 支持集群访问吗？
-有相关需求去适配支持，如果是主从类型的话，指定主节点即可，要可写，如果是哨兵则暂时不支持
-
-3.是否支持其他的数据库
-如果是与 Mysql8 同语法的数据库或分支数据库可以支持
-
-## 二、获取安装文件
+### 3.获取安装文件
 
 请联系 Apifox 工作人员获取`安装文件下载地址` 和 `授权 License 序列号`
 解压后的安装文件包含如下：
 
-
 **1. 以下文件为必须下载：**
+
 `apifox-ee-xxx.docker.zip`：apifox 服务端 docker 镜像压缩包，需 zip 解压（文件名中的 xxx 表示版本号）
 
 
@@ -54,6 +41,21 @@ Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念
 
 `mysql-8.0.docker.zip`：mysql 官方镜像（mysql:8.0）压缩包，需 zip 解压
 `redis-6.0.5-alpine.docker.zip`：redis 官方镜像（redis:6.0.5-alpine）压缩包，需 zip 解压
+
+### 4. 服务器资源相关Q&A
+
+1.Apifox支持非K8s的集群部署吗？ 
+支持的，将镜像导入到这个集群内的镜像源里，参考 docker run 去编写或界面化配置启动即可
+
+2.访问Redis支持集群访问吗？
+有相关需求去适配支持，如果是主从类型的话，指定主节点即可，要可写，如果是哨兵则暂时不支持
+
+3.是否支持其他的数据库
+如果是与Mysql8同语法的数据库或分支数据库可以支持
+
+
+
+
 
 ## 部署流程
 
@@ -66,6 +68,7 @@ Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念
 
 
 **1. 以下文件为必须下载：**
+
 `apifox-ee-xxx.docker.zip`：apifox 服务端 docker 镜像压缩包，需 zip 解压（文件名中的 xxx 表示版本号）
 
 
@@ -86,6 +89,7 @@ Apifox 所做的 API 相关一体化协作流程，围绕 API 文档先行理念
 如果已有 mysql 数据库，可直接跳过这一步。
 
 **1.1.1 加载 mysql 离线镜像**
+
 提示：如服务器可以直连外网，可跳过本步骤。
 
 将`mysql-8.0.docker.zip`解压（解压命令：`unzip mysql-8.0.docker.zip`）后得到文件`mysql-8.0.docker`，然后运行以下命令。
@@ -310,11 +314,11 @@ Apifox 私有化版本需`>= 2.5.1`才能使用实时协同功能
 | DISABLE_REGISTER                   | 是否禁止注册功能                                      |        | 可选填：true、false，填 true 表示禁止，不设置表示允许注册；开启禁止注册功能后，只允许手动在后台管理添加账号（SSO 登录也会被禁止创建新账号） |
 | PASSWORD_ERROR_RATE_LIMIT_DURATION | 登录错误次数限制【时间间隔】，单位秒                  | 1800   |                                                              |
 | PASSWORD_ERROR_RATE_LIMIT_MAX      | 【时间间隔】内允许最多错误次数                        | 15     | 0 表示不限制次数。                                           |
-| PASSWORD_TRANSFER_EXTRA_ENCRYPTION | 是否开启密码传输加密                                  |        | 选填，填 true 表示启用                                       |
+| SWORD_TRANSFER_EXTRA_ENCRYPTION    | 是否开启密码传输加密                                  |        | 选填，填 true 表示启用                                       |
 | SECRET_KEY_FOR_COMMON_CASE         | rsa 加密键值对                                        |        | 例如：'[{"public":"base64编码后的公钥","private":"base64 编码后的私钥"}]' |
 | APP_DOMAIN_WHITE_LIST              | CORS 同源策略相关，设置允许访问跨域访问后端服务的域名 |        | 从 2.3.12 开始的服务端版本才支持。示例值：http://apifox.com,https://apifox.com,http://app.apifox.com |
 
-##### 静态文件资源存储（非必须）
+#### 静态文件资源存储（非必须）
 
 主要用来存放客户端安装包和升级包。
 :::caution
@@ -358,7 +362,7 @@ fi
 ```
 
 
-#### 三、系统管理后台
+## 三、系统管理后台
 
 开启系统管理后台，需要启动服务端容器时配置相关的环境变量，如下：
 
@@ -370,11 +374,11 @@ fi
 > 其中 http://xxx 为 BASE_URL 变量配置的地址，服务端容器镜像的启动变量里还需要增加设置管理后台的账号和密码环境变量才能登录使用。
 
 
-#### 四、数据备份
+## 四、数据备份
 
 为了保障数据安全，请务必设置每日定时备份数据库，只要备份 mysql 数据库即可。
 
-#### 五、客户端自动更新
+## 五、客户端自动更新
 
 1. 自 2.5.1 版本后支持检测更新功能，需要运维部署人员在 docker 镜像启动时新增一个挂载目录，挂载到容器 /usr/src/app/app/public/client-packages 目录内，例如 ：
 
@@ -404,17 +408,7 @@ docker logs apifox -f
 
 到此，安装已完成。
 
-如果遇到问题，可以参考 [常见问题](#user-content-%E5%AE%B9%E5%99%A8%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%BC%82%E5%B8%B8)
 
-### 使用Demo
-
-`(服务使用说明内容)`
-
-```
-eg:
-
-请访问Demo官网了解如何使用：[使用文档](https://www.aliyun.com)
-```
 
 ## 问题排查
 
@@ -520,20 +514,13 @@ map_hash_bucket_size 26214;
 1. rm -f /tmp/apifox-backend.sock
 2. 手动重启一下容器
 
-### 生成业务代码下载安装生成插件提示错误
-
-1. 通过 https://cdn.apifox.cn/app/static/openapi-generator-cli.jar 手动下载生成代码插件；
-2. 将插件手动放到 Apifox 安装目录中即可；
 
 
-如有更多问题请查看文档 https://apifox-ee-setup.apifox.cn/?pwd=FhUcxj0y
 
-## 联系我们
+联系我们
 
-欢迎访问Apifox官网（[https://apifox.com/](https://apifox.com)）了解更多信息。
+欢迎访问 Apifox 官网（[https://apifox.com/](https://apifox.com)）了解更多信息。
 
 联系邮箱：[alextian@apifox.com](alextian@apifox.com)
 
 联系电话：[400-0518-030](400-0518-030)
-
-<img src="./202312051047964.png" alt="Apifox 客户经理" width="300" style="border: 1px solid #ccc; padding: 10px;">
